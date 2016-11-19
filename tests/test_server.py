@@ -7,7 +7,7 @@ class TestServer(TestCase):
     def test_connect(self):
         def test(context, process):
             # Server-side
-            def server(context, process):
+            def test_server(context, process):
                 print "process %d: listen" % process
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 server.add(context, s)
@@ -15,6 +15,7 @@ class TestServer(TestCase):
                 s.listen(1)
                 yield
                 conn, addr = s.accept()
+                print server
                 server.add(context, conn)
                 print "process %d: connected by %s" % (process, str(addr))
                 while not server.is_readable(context, conn):
@@ -28,7 +29,7 @@ class TestServer(TestCase):
                 server.remove(context, s)
                 yield True
             # Client-side
-            def client(context, process):
+            def test_client(context, process):
                 print "process %d: connect" % process
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 server.add(context, s)
@@ -41,6 +42,6 @@ class TestServer(TestCase):
                 server.remove(context, s)
                 yield True
             # Run server if process id is 0, client otherwise
-            for result in server(context, process) if process == 0 else client(context, process):
+            for result in test_server(context, process) if process == 0 else test_client(context, process):
                 yield result
         system.run(2, server.server_wrapper(system.main_loop), test)

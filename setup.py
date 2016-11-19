@@ -17,5 +17,6 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7'
     ],
-    packages=find_packages()
+    packages=find_packages(),
+    test_suite="tests"
 )
