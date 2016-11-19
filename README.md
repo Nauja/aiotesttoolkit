@@ -112,7 +112,7 @@ process 3: received "Hello" from process 2
 
 ## server.py
 
-This module simply add a custom main loop that manage a list of sockets, allowing processes to communicate with a server. It shows how you can extend the system main loop to add new and non intrusive functionalities to the system.
+This module simply add a wrapper to the system main loop that manage a list of sockets, allowing processes to communicate with a server. It shows how you can extend the system main loop to add new and non intrusive functionalities to the system.
 
 Here is a complete example of what you can do with this module:
 
