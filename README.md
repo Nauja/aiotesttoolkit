@@ -110,6 +110,14 @@ process 1: received "Hello" from process 0
 process 3: received "Hello" from process 2
 ```
 
+Used functions:
+
+```
+join(context, process, group): make a process join a group.
+send(context, process, filter, data): send data to all processes matching a filter.
+recv(context, process, filter): receive all messages matching a filter.
+```
+
 ## server.py
 
 This module simply add a wrapper to the system main loop that manage a list of sockets, allowing processes to communicate with a server. It shows how you can extend the system main loop to add new and non intrusive functionalities to the system.
@@ -168,3 +176,11 @@ process 1: received "hello"
 ```
 
 Of course in a real world example, the processes would connect to a real server.
+
+Used functions:
+
+```
+add(context, socket): register a socket to the system.
+remove(context, socket): unregister a socket from the system.
+is_readable(context, socket): indicate if there is data to read from a socket.
+```
