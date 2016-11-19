@@ -6,7 +6,8 @@ install:
   pip install coveralls
   
 after_success:
-  coveralls
+  - coveralls
+  - CODECLIMATE_REPO_TOKEN=a190e578f337a180abaf9310aa0aa54bb94e796391697a873eded83424fd2ce7 codeclimate-test-reporter
 
 addons:
   code_climate:
