@@ -5,7 +5,7 @@
 [![Code Climate](https://codeclimate.com/github/Nauja/testtoolkit/badges/gpa.svg)](https://codeclimate.com/github/Nauja/testtoolkit)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/Nauja/testtoolkit/issues)
 
-A simple, lightweight yet powerful toolkit for stress testing and benchmarking servers.
+A simple, lightweight yet powerful toolkit for running bots to stress test and benchmark servers.
 
 ## Why ?
 
