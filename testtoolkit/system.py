@@ -49,10 +49,6 @@ class Context(dict):
     def __setattr__(self, attr, value):
         self[attr] = value
 
-############
-# Messages #
-############
-
 # Return all received messages matching a filter
 def _messages(context, receiver, filter):
     return (msg for msg in context.message_queues[receiver] if not msg["read"] and filter(msg))
@@ -99,10 +95,6 @@ def recv_from(*args):
         return message["sender"] in args
     return _recv_from
 
-##########
-# Groups #
-##########
-
 # Get all processes in a group
 def get_group_processes(context, group):
     return (_ for _ in context.groups[group]) if group in context.groups else ()
@@ -117,95 +109,3 @@ def leave(context, process, group):
         groups[group].remove(process)
         if len(groups[group]) == 0:
             del groups[group]
-           
-##########
-# Tests #
-##########
- 
-# Test running the system
-def test_run(context, process):
-    for i in xrange(1, 3 + process):
-        print "process %d: step %d" % (process, i)
-        yield
-    yield True
-       
-# Test sending messages between processes 
-def test_send(context, process):
-    # Send message from process 0 to everyone
-    if process == 0:
-        print context
-        sent_to = [_ for _ in send(context, process, send_all(context, 0), 1)]
-        assert len(sent_to) == 2, "Message not sent to everyone"
-        assert 1 in sent_to and 2 in sent_to, "Message sent to wrong process"
-    yield
-    # Check that process 1 and 2 received a message from process 0
-    if process == 0:
-        print context
-        assert not has_message(context, process, recv_all()), "Message received"
-    else:
-        assert has_message(context, process, recv_all()), "No message received"
-        msg = next(recv(context, process, recv_all()))
-        msg["sender"] == 0, "Wrong message received"
-        msg["message"] == 1, "Wrong message received"
-    yield
-    # Check that there is no received message remaining
-    if process == 0:
-        print context
-    assert not has_message(context, process, recv_all()), "Message received"
-    yield
-    
-# Test sending messages to processes in a group
-def test_send_group(context, process):
-    # Send message to processes in group 1
-    if process == 0:
-        sent_to = [_ for _ in send(context, process, send_group(context, process, 1), 1)]
-        print sent_to
-    yield
-    # Check message has been received
-    if process != 0:
-        assert has_message(context, process, recv_all()), "No message received"
-        msg = next(recv(context, process, recv_all()))
-        msg["sender"] == 0, "Wrong message received"
-        msg["message"] == 1, "Wrong message received"
-
-# Test creating and joining groups
-def test_groups(context, process):
-    if process == 0:
-        print context
-    # All process join group 1
-    join(context, process, 1)
-    yield
-    assert process in get_group_processes(context, 1), "Failed to join group"
-    if process == 0:
-        print context
-    # Send message to processes in group 1
-    if process == 0:
-        sent_to = [_ for _ in send(context, process, send_group(context, process, 1), 1)]
-        print sent_to
-    yield
-    # Check message has been received
-    if process != 0:
-        assert has_message(context, process, recv_all()), "No message received"
-        msg = next(recv(context, process, recv_all()))
-        msg["sender"] == 0, "Wrong message received"
-        msg["message"] == 1, "Wrong message received"
-    yield
-    # All process join group 2
-    join(context, process, 2)
-    yield
-    assert process in get_group_processes(context, 2), "Failed to join group"
-    if process == 0:
-        print context
-    # All process leave group 1
-    leave(context, process, 1)
-    yield
-    assert process not in get_group_processes(context, 1), "Failed to leave group"
-    if process == 0:
-        print context
-        
-if __name__ == '__main__':
-    run(3, main_loop, test_run)
-    run(3, main_loop, test_send)
-    run(3, main_loop, test_send_group)
-    run(3, main_loop, test_groups)
-    

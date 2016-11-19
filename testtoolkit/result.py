@@ -1,5 +1,3 @@
-import system
-
 # Main loop: store processes results into the context and return the result produced by result_handler
 def result_wrapper(result_handler, main_loop):
     def wrapper(context, processes):
@@ -18,19 +16,3 @@ def result_producer(method):
             context.results[process] = result
             yield result
     return wrapper
-
-@result_producer
-def test_result(context, process):
-    yield process + 1
-    
-def sum(loop_result, processes_results):
-    return reduce(lambda x, y: x + y, processes_results)
-    
-def mult(loop_result, processes_results):
-    return reduce(lambda x, y: x * y, processes_results)
-    
-if __name__ == '__main__':
-    result = system.run(4, result_wrapper(sum, system.main_loop), test_result)
-    print "result", result
-    result = system.run(4, result_wrapper(mult, system.main_loop), test_result)
-    print "result", result

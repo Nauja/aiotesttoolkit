@@ -1,5 +1,3 @@
-import system
-import socket
 import select
 
 # Main loop: manage sockets used by the system
@@ -45,10 +43,6 @@ def server_wrapper(main_loop):
             yield result
     return wrapper
 
-###########
-# Sockets #
-###########
-
 # Add a socket to the context
 def add(context, socket):
     context.sockets_to_add.add(socket)
@@ -68,49 +62,3 @@ def is_writable(context, socket):
 # Indicate if a socket has an error
 def has_error(context, socket):
     return socket in context.exceptional if context.exceptional else False
-
-#########
-# Tests #
-#########
-
-# Test connecting two processes together via sockets
-def test_connect(context, process):
-    def server(context, process):
-        print "process %d: listen" % process
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        add(context, s)
-        s.bind(("127.0.0.1", 8016))
-        s.listen(1)
-        yield
-        conn, addr = s.accept()
-        add(context, conn)
-        print "process %d: connected by %s" % (process, str(addr))
-        while not is_readable(context, conn):
-            yield
-        print 'process %d: received "%s"' % (process, str(conn.recv(1024)))
-        yield
-        print "process %d: socket closed" % process
-        conn.close()
-        remove(context, conn)
-        s.close()
-        remove(context, s)
-        yield True
-        
-    def client(context, process):
-        print "process %d: connect" % process
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        add(context, s)
-        s.connect(("127.0.0.1", 8016))
-        yield
-        s.sendall("hello world")
-        yield
-        print "process %d: socket closed" % process
-        s.close()
-        remove(context, s)
-        yield True
-        
-    for result in server(context, process) if process == 0 else client(context, process):
-        yield result
-    
-if __name__ == '__main__':
-    system.run(2, server_wrapper(system.main_loop), test_connect)
