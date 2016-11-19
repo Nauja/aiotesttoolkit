@@ -79,26 +79,26 @@ This module is the core of the package. By itself it contains only the bare mini
 Here is a complete example of what you can do with this module:
 
 ```python
-from testtoolkit import system
+from testtoolkit.system import *
 
 def example(context, process):
   # Processes 0 and 1: join group 0, processes 2 and 3: join group 1
   my_group = process / 2
-  system.join(context, process, my_group)
+  join(context, process, my_group)
   # Necessary to let all processes join the groups before the next step
   yield
   # Process 0: send "Hello" to group 0, process 2: send "Hello" to group 1
   if process % 2 == 0:
-    send_filter = system.send_group(context, process, my_group)
-    for receiver in system.send(context, process, send_filter, "Hello"):
+    send_filter = send_group(context, process, my_group)
+    for receiver in send(context, process, send_filter, "Hello"):
       print 'process %d: sent "Hello" to process %d' % (process, receiver)
   else:
-    while not system.has_message(context, process, system.recv_all()):
+    while not has_message(context, process, recv_all()):
       yield
-    for msg in system.recv(context, process, system.recv_all()):
+    for msg in recv(context, process, recv_all()):
       print 'process %d: received "%s" from process %d' % (process, msg.data, msg.sender)
       
-system.run(4, system.main_loop, example)
+run(4, main_loop, example)
 ```
 
 It would output:
@@ -125,33 +125,35 @@ This module simply add a wrapper to the system main loop that manage a list of s
 Here is a complete example of what you can do with this module:
 
 ```python
-from testtoolkit import system, server
+from testtoolkit.system import *
+from testtoolkit.server import *
+import socket
 
 def example(context, process):
   # Process 0 act as a server, process 1 as a client
   if process == 0:
     # Create a server on port 1234
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.add(context, s)
+    add(context, s)
     s.bind(("127.0.0.1", 1234))
     s.listen(1)
     print "process 0: listening on port 1234"
     yield
     # Accept a connection and send "hello"
     conn, addr = s.accept()
-    server.add(context, conn)
+    add(context, conn)
     print "process 0: connection from %s" % str(addr)
     conn.sendall("hello")
     yield
     # Close the server and connection
     conn.close()
-    server.remove(context, conn)
+    remove(context, conn)
     s.close()
-    server.remove(context, s)
+    remove(context, s)
   else:
     # Connect to the server on port 1234
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.add(context, s)
+    add(context, s)
     s.connect(("127.0.0.1", 1234))
     print "process 1: connected on port 1234"
     yield
@@ -161,9 +163,9 @@ def example(context, process):
     print 'process 1: received "%s"' % str(s.recv(1024))
     # Close the connection
     s.close()
-    server.remove(context, s)
+    remove(context, s)
       
-system.run(2, server.server_wrapper(system.main_loop), example)
+run(2, server_wrapper(main_loop), example)
 ```
 
 It would output:
