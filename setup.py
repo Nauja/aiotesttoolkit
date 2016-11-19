@@ -17,6 +17,6 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7'
     ],
-    packages=find_packages(),
-    test_suite="tests"
+    packages=find_packages(exclude=['tests']),
+    test_suite='tests'
 )
