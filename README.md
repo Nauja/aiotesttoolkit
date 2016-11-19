@@ -13,7 +13,7 @@ This package was created because while working on a game server I needed a tool 
 * Is simple, lightweight, and doesn't come with tons of unnecessary classes.
 * Can run bots acting like normal players for unit testing and debugging purposes.
 * Can stress test the server by running a massive amount of bots on the same computer for benchmarking purposes.
-* Is generic and extensible enough so that I can use it on other projects with their own game servers.
+* Is generic and extensible enough to use it on any project with their own game servers and networking protocols.
 
 From theses needs came the requirements that the tool should:
 * Run all the bots in one single thread: for not having 100+ threads.
