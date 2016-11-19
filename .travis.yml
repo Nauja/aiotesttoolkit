@@ -5,4 +5,5 @@ python:
 install:
   
 script:
+  python setup.py install
   python -m unittest discover
