@@ -3,15 +3,12 @@ python:
   - "2.7"
   
 install:
-  pip install coveralls
+  - pip install codeclimate-test-reporter
+  - pip install coveralls
   
 after_success:
   - coveralls
-  - CODECLIMATE_REPO_TOKEN=a190e578f337a180abaf9310aa0aa54bb94e796391697a873eded83424fd2ce7 codeclimate-test-reporter
-
-addons:
-  code_climate:
-    repo_token: a190e578f337a180abaf9310aa0aa54bb94e796391697a873eded83424fd2ce7
+  - codeclimate-test-reporter
   
 script:
   coverage run --source=testtoolkit setup.py test
