@@ -74,7 +74,7 @@ So, if **do_something** contained no **yield** then the processes would all run 
 
 ## system.py
 
-This module is the core of this package. By itself it contains only the bare minimum to run a system of any amount of bots on the same function and allow them to interact with each others.
+This module is the core of the package. By itself it contains only the bare minimum to run a system of any amount of bots on the same function and allow them to interact with each others.
 
 Here is a complete example of what you can do with this module:
 
