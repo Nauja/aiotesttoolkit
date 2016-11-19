@@ -166,3 +166,5 @@ process 1: connected on port 1234
 process 0: connection from ('127.0.0.1', 57602)
 process 1: received "hello"
 ```
+
+Of course in a real world example, the processes would connect to a real server.
