@@ -72,55 +72,97 @@ for process in processes:
 
 So, if **do_something** contained no **yield** then the processes would all run sequentially.
 
-## Examples
+## system.py
 
-### Run multiple processes on a function
+This module is the core of this package. By itself it contains only the bare minimum to run a system of any amount of bots on the same function and allow them to interact with each others.
 
-This example shows the minimum required code to run 2 processes on a single function:
-
-```python
-from testtoolkit import system
-
-def print_process(context, process):
-  print "process %d: %d" % (process, 1)
-  print "process %d: %d" % (process, 2)
-
-system.run(2, system.main_loop, print_process)
-```
-
-The code above produces the following result:
-
-```python
-process 0: 1
-process 0: 2
-process 1: 1
-process 1: 2
-```
-
-As you can see the system run the processes sequentially as there is only one single thread for all the processes.
-
-### Run multiple processes on a function in parallel
-
-This example shows how to run the processes in parallel by using **yield**:
+Here is a complete example of what you can do with this module:
 
 ```python
 from testtoolkit import system
 
-def print_process(context, process):
-  print "process %d: %d" % (process, 1)
+def example(context, process):
+  # Processes 0 and 1: join group 0, processes 2 and 3: join group 1
+  my_group = process / 2
+  system.join(context, process, my_group)
+  # Necessary to let all processes join the groups before the next step
   yield
-  print "process %d: %d" % (process, 2)
-
-system.run(2, system.main_loop, print_process)
+  # Process 0: send "Hello" to group 0, process 2: send "Hello" to group 1
+  if process % 2 == 0:
+    send_filter = system.send_group(context, process, my_group)
+    for receiver in system.send(context, process, send_filter, "Hello"):
+      print 'process %d: sent "Hello" to process %d' % (process, receiver)
+  else:
+    while not system.has_message(context, process, system.recv_all()):
+      yield
+    for msg in system.recv(context, process, system.recv_all()):
+      print 'process %d: received "%s" from process %d' % (process, msg.data, msg.sender)
+      
+system.run(4, system.main_loop, example)
 ```
 
-The code above produces the following result:
+It would output:
+
+```
+process 0: sent "Hello" to process 1
+process 2: sent "Hello" to process 3
+process 1: received "Hello" from process 0
+process 3: received "Hello" from process 2
+```
+
+## server.py
+
+This module simply add a custom main loop that manage a list of sockets, allowing processes to communicate with a server. It shows how you can extend the system main loop to add new and non intrusive functionalities to the system.
+
+Here is a complete example of what you can do with this module:
 
 ```python
-process 0: 1
-process 1: 1
-process 0: 2
-process 1: 2
+from testtoolkit import system, server
+
+def example(context, process):
+  # Process 0 act as a server, process 1 as a client
+  if process == 0:
+    # Create a server on port 1234
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.add(context, s)
+    s.bind(("127.0.0.1", 1234))
+    s.listen(1)
+    print "process 0: listening on port 1234"
+    yield
+    # Accept a connection and send "hello"
+    conn, addr = s.accept()
+    server.add(context, conn)
+    print "process 0: connection from %s" % str(addr)
+    conn.sendall("hello")
+    yield
+    # Close the server and connection
+    conn.close()
+    server.remove(context, conn)
+    s.close()
+    server.remove(context, s)
+  else:
+    # Connect to the server on port 1234
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.add(context, s)
+    s.connect(("127.0.0.1", 1234))
+    print "process 1: connected on port 1234"
+    yield
+    # Wait to receive some data
+    while not server.is_readable(context, s):
+      yield
+    print 'process 1: received "%s"' % str(s.recv(1024))
+    # Close the connection
+    s.close()
+    server.remove(context, s)
+      
+system.run(2, server.server_wrapper(system.main_loop), example)
 ```
 
-Adding the keyword **yield** between the two print allow our processes to do cooperative threading and run in parallel.
+It would output:
+
+```
+process 0: listening on port 1234
+process 1: connected on port 1234
+process 0: connection from ('127.0.0.1', 57602)
+process 1: received "hello"
+```
