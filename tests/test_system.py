@@ -27,8 +27,8 @@ class TestSystem(TestCase):
             else:
                 assert system.has_message(context, process, system.recv_all()), "No message received"
                 msg = next(system.recv(context, process, system.recv_all()))
-                msg["sender"] == 0, "Wrong message received"
-                msg["message"] == 1, "Wrong message received"
+                msg.sender == 0, "Wrong message received"
+                msg.data == 1, "Wrong message received"
             yield
             # Check that there is no received message remaining
             if process == 0:
@@ -37,22 +37,6 @@ class TestSystem(TestCase):
             yield
         system.run(3, system.main_loop, test)
         
-    # Test sending messages to processes in a group
-    def test_send_group(self):
-        def test(context, process):
-            # Send message to processes in group 1
-            if process == 0:
-                sent_to = [_ for _ in system.send(context, process, system.send_group(context, process, 1), 1)]
-                print sent_to
-            yield
-            # Check message has been received
-            if process != 0:
-                assert system.has_message(context, process, system.recv_all()), "No message received"
-                msg = next(system.recv(context, process, system.recv_all()))
-                msg["sender"] == 0, "Wrong message received"
-                msg["message"] == 1, "Wrong message received"
-        system.run(3, system.main_loop, test)
-    
     # Test creating and joining groups
     def test_groups(self):
         def test(context, process):
@@ -73,8 +57,8 @@ class TestSystem(TestCase):
             if process != 0:
                 assert system.has_message(context, process, system.recv_all()), "No message received"
                 msg = next(system.recv(context, process, system.recv_all()))
-                msg["sender"] == 0, "Wrong message received"
-                msg["message"] == 1, "Wrong message received"
+                msg.sender == 0, "Wrong message received"
+                msg.data == 1, "Wrong message received"
             yield
             # All process join group 2
             system.join(context, process, 2)
@@ -89,3 +73,18 @@ class TestSystem(TestCase):
             if process == 0:
                 print context
         system.run(3, system.main_loop, test)
+        
+    def test_example(self):
+        def test(context, process):
+            my_group = process / 2
+            system.join(context, process, my_group)
+            yield
+            if process % 2 == 0:
+                for receiver in system.send(context, process, system.send_group(context, process, my_group), "Hello"):
+                    print 'process %d: sent "Hello" to process %d' % (process, receiver)
+            else:
+                while not system.has_message(context, process, system.recv_all()):
+                    yield
+                for msg in system.recv(context, process, system.recv_all()):
+                    print 'process %d: received "%s" from process %d' % (process, msg.data, msg.sender)
+        system.run(4, system.main_loop, test)

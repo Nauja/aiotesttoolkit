@@ -14,19 +14,14 @@ def server_wrapper(main_loop):
             context.sockets_to_add.clear()
         # Add socket lists to context
         sockets = set([])
-        context["sockets"] = sockets
-        context["sockets_to_add"] = set([])
-        context["sockets_to_remove"] = set([])
-        context["readable"] = None
-        context["writable"] = None
-        context["exceptional"] = None
+        context.sockets = sockets
+        context.sockets_to_add = set([])
+        context.sockets_to_remove = set([])
+        context.readable = None
+        context.writable = None
+        context.exceptional = None
         # Run main loop
-        loop = main_loop(context, processes)
-        while True:
-            # Pre loop processing
-            yield next(loop)
-            # Post loop processing
-            result = next(loop)
+        for result in main_loop(context, processes):
             # Dequeue the sockets from add and remove lists
             _dequeue_sockets_add_remove()
             # Wait for sockets to be readable or writable

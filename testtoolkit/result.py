@@ -2,11 +2,13 @@
 def result_wrapper(result_handler, main_loop):
     def wrapper(context, processes):
         # Prepare a list of pool_size results for processes
-        context["results"] = [None for _ in xrange(0, context.pool_size)]
+        context.results = [None for _ in xrange(0, context.pool_size)]
         # Run main loop
+        result = None
         for result in main_loop(context, processes):
-            # Return the final result produced by result_handler or go to the next step
-            yield result_handler(result, (_ for _ in context.results)) if result else result
+            yield
+        # Let result_handler process the results
+        yield result_handler(result, (_ for _ in context.results))
     return wrapper
 
 # Store the last process result into the context
