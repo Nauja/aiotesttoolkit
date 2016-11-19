@@ -7,7 +7,7 @@
 
 A simple, lightweight yet powerful toolkit for stress testing and benchmarking servers.
 
-### Why ?
+## Why ?
 
 This package was created because while working on a game server I needed a tool that:
 * Is simple, lightweight, and doesn't come with tons of unnecessary classes.
@@ -31,6 +31,46 @@ And this is exactly what you can expect to find in this package.
 ```
 python setup.py install
 ```
+
+## How it works
+
+Here is a little explanation of how this package works with one example:
+
+```python
+from testtoolkit import system
+
+def do_something(context, process):
+  print "process %d: started" % process
+  yield
+  print "process %d: working" % process
+  yield
+  print "process %d: terminated" % process
+
+system.run(2, system.main_loop, do_something)
+```
+
+It would output:
+
+```
+process 0: started
+process 1: started
+process 0: working
+process 1: working
+process 0: terminated
+process 1: terminated
+```
+
+Firstly, it is important to understand that this package makes heavy use of python generators to achieve **cooperative threading** with a single thread. Processes are run sequentially and are required to **yield** when they want to let other processes to continue.
+
+In the example, the function **do_something** that is passed to **run** is treated as a generator, and basically what the **main_loop** is doing is:
+
+```python
+processes = [do_something(context, i) for i in xrange(0, nb_processes)]
+for process in processes:
+  next(process)
+```
+
+So, if **do_something** contained no **yield** then the processes would all run sequentially.
 
 ## Examples
 
