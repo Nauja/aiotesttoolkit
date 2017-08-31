@@ -10,33 +10,34 @@ async def main_loop(system):
 # Handle a pool of running processes.
 class System(object):
     def __init__(self):
-        self._processes = []
+        self.processes = []
+        self.task = None
         
     # Start the main loop.
     def start(self, main_loop = main_loop):
-        self._task_handle = asyncio.get_event_loop().create_task(self.run(main_loop))
+        self.task = asyncio.get_event_loop().create_task(self.run(main_loop))
         
     # Stop the System.
     def stop(self):
         # Stop the main loop.
-        if self._task_handle:
-            self._task_handle.cancel()
-            self._task_handle = None
+        if self.task:
+            self.task.cancel()
+            self.task = None
         # Stop all processes.
-        for process in self._processes:
+        for process in self.processes:
             process.cancel()
-        self._processes = []
+        self.processes = []
         
     # Block the thread until all processes are done.
     def run_until_complete(self):
-        if self._task_handle:
-            asyncio.get_event_loop().run_until_complete(self._task_handle)
+        if self.task:
+            asyncio.get_event_loop().run_until_complete(self.task)
         
     # Main loop.
     async def run(self, main_loop):
-        while len(self._processes) != 0:
+        while len(self.processes) != 0:
             await main_loop(self)
-            self._processes[:] = (process for process in self._processes if not process.done())
+            self.processes[:] = (process for process in self.processes if not process.done())
             await asyncio.sleep(1)
         
     # Add a process to the System and run it.
@@ -45,18 +46,18 @@ class System(object):
         context = utils.ClassDict()
         context.system = self
         process = Process(context)
-        self._processes.append(process)
+        self.processes.append(process)
         context.task = asyncio.get_event_loop().create_task(functools.partial(coro, process)(*args))
         return process
     
     # Stop a process.
     def stop_process(self, process):
-        if process in self._processes:
+        if process in self.processes:
             process.stop()
     
     # Get all processes matching a filter.
     def get_processes(self, filter, *args):
-        for process in self._processes:
+        for process in self.processes:
             if filter(process, *args):
                 yield process
                 
