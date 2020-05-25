@@ -1,0 +1,20 @@
+{
+	"children": [
+		{
+			"name": "tests.test_pool",
+			"test_cases": [
+				{
+					"name": "PoolTestCase",
+					"tests": [
+						{"name": "test_create"},
+						{"name": "test_create_factory"},
+						{"name": "test_create_main"},
+						{"name": "test_start"},
+						{"name": "test_start_decorator"},
+						{"name": "test_start_timeout"}
+					]
+				}
+			]
+		}
+	]
+}

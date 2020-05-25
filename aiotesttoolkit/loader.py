@@ -123,7 +123,7 @@ def run(config_filename, **kwargs):
     cover_html = kwargs.get("cover_html", None)
 
     cov = coverage.Coverage()
-    cov.load()
+    # cov.load()
     cov.start()
     suite = load_tests(config_filename, parent_module=parent_module)
     cov.stop()
