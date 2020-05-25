@@ -6,7 +6,7 @@ engines:
       - python
 ratings:
   paths:
-  - testtoolkit
+  - aiotesttoolkit
   - "**.py"
 exclude_paths:
 - tests
