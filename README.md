@@ -1,9 +1,13 @@
-# testtoolkit
+# aiotesttoolkit
 
-[![Build Status](https://travis-ci.org/Nauja/testtoolkit.png?branch=master)](https://travis-ci.org/Nauja/testtoolkit)
-[![Test Coverage](https://codeclimate.com/github/Nauja/testtoolkit/badges/coverage.svg)](https://codeclimate.com/github/Nauja/testtoolkit/coverage)
-[![Code Climate](https://codeclimate.com/github/Nauja/testtoolkit/badges/gpa.svg)](https://codeclimate.com/github/Nauja/testtoolkit)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/Nauja/testtoolkit/issues)
+![versions](https://img.shields.io/pypi/pyversions/aiotesttoolkit.svg)
+[![PyPI version](https://badge.fury.io/py/aiotesttoolkit.svg)](https://badge.fury.io/py/aiotesttoolkit)
+[![Build Status](https://travis-ci.org/Nauja/aiotesttoolkit.png?branch=master)](https://travis-ci.org/Nauja/aiotesttoolkit)
+[![Documentation Status](https://readthedocs.org/projects/aiotesttoolkit/badge/?version=latest)](https://aiotesttoolkit.readthedocs.io/en/latest/?badge=latest)
+[![Test Coverage](https://codeclimate.com/github/Nauja/aiotesttoolkit/badges/coverage.svg)](https://codeclimate.com/github/Nauja/aiotesttoolkit/coverage)
+[![Code Climate](https://codeclimate.com/github/Nauja/aiotesttoolkit/badges/gpa.svg)](https://codeclimate.com/github/Nauja/aiotesttoolkit)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/Nauja/aiotesttoolkit/issues)
 
 A simple, lightweight yet powerful toolkit for running bots to stress test and benchmark servers.
 
