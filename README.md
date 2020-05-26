@@ -30,10 +30,10 @@ And this is exactly what you can expect to find in this package.
 
 ## Installation
 
-### setup.py
+Using pip:
 
 ```
-python setup.py install
+pip install aiotesttoolkit
 ```
 
 ## How it works
@@ -41,16 +41,13 @@ python setup.py install
 Here is a little explanation of how this package works with one example:
 
 ```python
-from testtoolkit import system
-
-def do_something(context, process):
-  print "process %d: started" % process
-  yield
-  print "process %d: working" % process
-  yield
-  print "process %d: terminated" % process
-
-system.run(2, system.main_loop, do_something)
+>>> import aiotesttoolkit
+>>> async def worker():
+...   print("Hello World !")
+...
+>>> aiotesttoolkit.start(worker, size=2)
+Hello World !
+Hello World !
 ```
 
 It would output:
