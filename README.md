@@ -50,28 +50,53 @@ Hello World !
 Hello World !
 ```
 
-It would output:
-
-```
-process 0: started
-process 1: started
-process 0: working
-process 1: working
-process 0: terminated
-process 1: terminated
-```
-
-Firstly, it is important to understand that this package makes heavy use of python generators to achieve **cooperative threading** with a single thread. Processes are run sequentially and are required to **yield** when they want to let other processes to continue.
-
-In the example, the function **do_something** that is passed to **run** is treated as a generator, and basically what the **main_loop** is doing is:
+This is how you would run a pool of n concurrent workers.
+It internally relies on asyncio to run the workers, and you could obtain the same
+result with:
 
 ```python
-processes = [do_something(context, i) for i in xrange(0, nb_processes)]
-for process in processes:
-  next(process)
+>>> import asyncio
+>>> import aiotesttoolkit
+>>> async def worker():
+...   print("Hello World !")
+...
+>>> loop = asyncio.get_event_loop()
+>>> loop.run_until_complete(aiotesttoolkit.create(worker, size=2))
+Hello World !
+Hello World !
 ```
 
-So, if **do_something** contained no **yield** then the processes would all run sequentially.
+Another way to use `aiotesttoolkit.start` is to use it as a decorator on your worker function:
+
+```python
+>>> import aiotesttoolkit
+>>> @aiotesttoolkit.start(size=2)
+... async def worker():
+...   print("Hello World !")
+...
+>>> worker()
+Hello World !
+Hello World !
+```
+
+As you can see, there no way to identify which worker is running. By default, `aiotesttoolkit.start`
+doesn't attribute an unique identifier to your worker as it tries not to make any presumption of
+how your worker is written or will run. However you can customize how your workers are created with
+a custom factory:
+
+```python
+>>> import aiotesttoolkit
+>>> def create_workers(coro, *, size):
+...   return (coro(_) for _ in range(0, size))
+...
+>>> @aiotesttoolkit.start(factory=create_workers, size=2)
+... async def worker(i):
+...   print("worker {}: Hello World !".format(i))
+...
+>>> worker()
+worker 1: Hello World !
+worker 0: Hello World !
+```
 
 ## system.py
 
