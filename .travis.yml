@@ -1,14 +1,18 @@
 language: python
-python:
-  - "3.6"
   
 install:
+  - pip install "coverage>=4.0,<4.4"
   - pip install codeclimate-test-reporter
   - pip install coveralls
   
-after_success:
-  - coveralls
-  - codeclimate-test-reporter
-  
+jobs:
+  include:
+  - python: "3.6"
+    after_success:
+    - coveralls
+    - codeclimate-test-reporter
+  - python: "3.7"
+  - python: "3.8"
+
 script:
-  coverage run --source=aiotesttoolkit tests
+  coverage run --source=aiotesttoolkit setup.py test

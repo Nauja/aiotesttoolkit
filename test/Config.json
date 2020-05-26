@@ -1,7 +1,7 @@
 {
 	"children": [
 		{
-			"name": "tests.test_pool",
+			"name": "test.test_pool",
 			"test_cases": [
 				{
 					"name": "PoolTestCase",
