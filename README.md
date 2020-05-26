@@ -97,3 +97,17 @@ a custom factory:
 worker 1: Hello World !
 worker 0: Hello World !
 ```
+
+## Testing
+
+The test directory contains many tests that you can run with:
+
+```
+python setup.py test
+```
+
+Or with coverage:
+
+```
+coverage run --source=aiotesttoolkit setup.py test
+```
