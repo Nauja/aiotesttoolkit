@@ -28,7 +28,7 @@ From theses needs came the requirements that the tool should:
 
 And this is exactly what you can expect to find in this package.
 
-## Installation
+## Install
 
 Using pip:
 
