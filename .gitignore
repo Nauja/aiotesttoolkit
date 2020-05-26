@@ -1,5 +1,6 @@
-# KanjiDB
+# aiotesttoolkit
 
+.vscode
 etc/svg
 database/_src
 static/svg

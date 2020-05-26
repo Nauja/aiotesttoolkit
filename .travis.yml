@@ -11,4 +11,4 @@ after_success:
   - codeclimate-test-reporter
   
 script:
-  coverage run --source=aiotesttoolkit tests/__init__.py
+  coverage run --source=aiotesttoolkit tests
