@@ -59,8 +59,8 @@ def with_delay(delay):
     def decorator(fun):
         @functools.wraps(fun)
         async def wrapper(*args, **kwargs):
-            delay = delay if delay is not None else 0
-            await asyncio.sleep(delay)
+            _delay = delay if delay is not None else 0
+            await asyncio.sleep(_delay)
             return await fun(*args, **kwargs)
 
         return wrapper
@@ -83,8 +83,8 @@ def with_timeout(timeout):
     def decorator(fun):
         @functools.wraps(fun)
         async def wrapper(*args, **kwargs):
-            timeout = timeout if timeout is not None else 0
-            return await asyncio.wait([fun(*args, **kwargs)], timeout=timeout)
+            _timeout = timeout if timeout is not None else 0
+            return await asyncio.wait([fun(*args, **kwargs)], timeout=_timeout)
 
         return wrapper
 
