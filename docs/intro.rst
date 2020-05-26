@@ -67,15 +67,14 @@ From theses needs came the requirements that the tool should:
 
 And this is exactly what you can expect to find in this package.
 
-Installation
-------------
+Install
+-------
 
-setup.py
-^^^^^^^^
+Using pip:
 
 .. code-block::
 
-   python setup.py install
+   pip install aiotesttoolkit
 
 How it works
 ------------
@@ -84,153 +83,73 @@ Here is a little explanation of how this package works with one example:
 
 .. code-block:: python
 
-   from testtoolkit import system
+   >>> import aiotesttoolkit
+   >>> async def worker():
+   ...   print("Hello World !")
+   ...
+   >>> aiotesttoolkit.start(worker, size=2)
+   Hello World !
+   Hello World !
 
-   def do_something(context, process):
-     print "process %d: started" % process
-     yield
-     print "process %d: working" % process
-     yield
-     print "process %d: terminated" % process
-
-   system.run(2, system.main_loop, do_something)
-
-It would output:
-
-.. code-block::
-
-   process 0: started
-   process 1: started
-   process 0: working
-   process 1: working
-   process 0: terminated
-   process 1: terminated
-
-Firstly, it is important to understand that this package makes heavy use of python generators to achieve **cooperative threading** with a single thread. Processes are run sequentially and are required to **yield** when they want to let other processes to continue.
-
-In the example, the function **do_something** that is passed to **run** is treated as a generator, and basically what the **main_loop** is doing is:
+This is how you would run a pool of n concurrent workers.
+It internally relies on asyncio to run the workers, and you could obtain the same
+result with:
 
 .. code-block:: python
 
-   processes = [do_something(context, i) for i in xrange(0, nb_processes)]
-   for process in processes:
-     next(process)
+   >>> import asyncio
+   >>> import aiotesttoolkit
+   >>> async def worker():
+   ...   print("Hello World !")
+   ...
+   >>> loop = asyncio.get_event_loop()
+   >>> loop.run_until_complete(aiotesttoolkit.create(worker, size=2))
+   Hello World !
+   Hello World !
 
-So, if **do_something** contained no **yield** then the processes would all run sequentially.
-
-system.py
----------
-
-This module is the core of the package. By itself it contains only the bare minimum to run a system of any amount of bots on the same function and allow them to interact with each others.
-
-Here is a complete example of what you can do with this module:
-
-.. code-block:: python
-
-   from testtoolkit.system import *
-
-   def example(context, process):
-     # Processes 0 and 1: join group 0, processes 2 and 3: join group 1
-     my_group = process / 2
-     join(context, process, my_group)
-     # Necessary to let all processes join the groups before the next step
-     yield
-     # Process 0: send "Hello" to group 0, process 2: send "Hello" to group 1
-     if process % 2 == 0:
-       send_filter = send_group(context, process, my_group)
-       for receiver in send(context, process, send_filter, "Hello"):
-         print 'process %d: sent "Hello" to process %d' % (process, receiver)
-     else:
-       while not has_message(context, process, recv_all()):
-         yield
-       for msg in recv(context, process, recv_all()):
-         print 'process %d: received "%s" from process %d' % (process, msg.data, msg.sender)
-
-   run(4, main_loop, example)
-
-It would output:
-
-.. code-block::
-
-   process 0: sent "Hello" to process 1
-   process 2: sent "Hello" to process 3
-   process 1: received "Hello" from process 0
-   process 3: received "Hello" from process 2
-
-Used functions:
-
-.. code-block::
-
-   join(context, process, group): make a process join a group.
-   send(context, process, filter, data): send data to all processes matching a filter.
-   recv(context, process, filter): receive all messages matching a filter.
-
-server.py
----------
-
-This module simply add a wrapper to the system main loop that manage a list of sockets, allowing processes to communicate with a server. It shows how you can extend the system main loop to add new and non intrusive functionalities to the system.
-
-Here is a complete example of what you can do with this module:
+Another way to use ``aiotesttoolkit.start`` is to use it as a decorator on your worker function:
 
 .. code-block:: python
 
-   from testtoolkit.system import *
-   from testtoolkit.server import *
-   import socket
+   >>> import aiotesttoolkit
+   >>> @aiotesttoolkit.start(size=2)
+   ... async def worker():
+   ...   print("Hello World !")
+   ...
+   >>> worker()
+   Hello World !
+   Hello World !
 
-   def example(context, process):
-     # Process 0 act as a server, process 1 as a client
-     if process == 0:
-       # Create a server on port 1234
-       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-       add(context, s)
-       s.bind(("127.0.0.1", 1234))
-       s.listen(1)
-       print "process 0: listening on port 1234"
-       yield
-       # Accept a connection and send "hello"
-       conn, addr = s.accept()
-       add(context, conn)
-       print "process 0: connection from %s" % str(addr)
-       conn.sendall("hello")
-       yield
-       # Close the server and connection
-       conn.close()
-       remove(context, conn)
-       s.close()
-       remove(context, s)
-     else:
-       # Connect to the server on port 1234
-       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-       add(context, s)
-       s.connect(("127.0.0.1", 1234))
-       print "process 1: connected on port 1234"
-       yield
-       # Wait to receive some data
-       while not server.is_readable(context, s):
-         yield
-       print 'process 1: received "%s"' % str(s.recv(1024))
-       # Close the connection
-       s.close()
-       remove(context, s)
+As you can see, there no way to identify which worker is running. By default, ``aiotesttoolkit.start``
+doesn't attribute an unique identifier to your worker as it tries not to make any presumption of
+how your worker is written or will run. However you can customize how your workers are created with
+a custom factory:
 
-   run(2, server_wrapper(main_loop), example)
+.. code-block:: python
 
-It would output:
+   >>> import aiotesttoolkit
+   >>> def create_workers(coro, *, size):
+   ...   return (coro(_) for _ in range(0, size))
+   ...
+   >>> @aiotesttoolkit.start(factory=create_workers, size=2)
+   ... async def worker(i):
+   ...   print("worker {}: Hello World !".format(i))
+   ...
+   >>> worker()
+   worker 1: Hello World !
+   worker 0: Hello World !
+
+Testing
+-------
+
+The test directory contains many tests that you can run with:
 
 .. code-block::
 
-   process 0: listening on port 1234
-   process 1: connected on port 1234
-   process 0: connection from ('127.0.0.1', 57602)
-   process 1: received "hello"
+   python setup.py test
 
-Of course in a real world example, the processes would connect to a real server.
-
-Used functions:
+Or with coverage:
 
 .. code-block::
 
-   add(context, socket): register a socket to the system.
-   remove(context, socket): unregister a socket from the system.
-   is_readable(context, socket): indicate if there is data to read from a socket.
+   coverage run --source=aiotesttoolkit setup.py test

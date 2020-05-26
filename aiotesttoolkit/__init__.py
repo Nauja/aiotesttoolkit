@@ -4,6 +4,7 @@ from .__version__ import __version_major__, __version_long__, __version__, __sta
 from aiotesttoolkit._pool import *
 from aiotesttoolkit._utils import *
 from aiotesttoolkit._test_utils import *
+
 __all__ = [
     "version_info",
     "__version_major__",
@@ -20,7 +21,7 @@ __all__ = [
     "with_delay",
     "with_timeout",
     # _test_utils
-    "TestCase"
+    "TestCase",
 ]
 
 
