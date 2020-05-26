@@ -1,5 +1,5 @@
-""" Common utility functions to control scenario execution """
-__all__ = ["with_new_event_loop", "with_delay", "with_timeout", "run_forever"]
+""" Common utility functions to control execution """
+__all__ = ["with_new_event_loop", "with_delay", "with_timeout"]
 import asyncio
 import functools
 
@@ -7,13 +7,12 @@ import functools
 def with_new_event_loop(_fun=None):
     """Run a function with a new event loop.
 
-    Equivalent to:
-
     .. code-block:: python
 
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        fun(loop=loop)
+        @aiotesttoolkit.with_new_event_loop()
+        def foo():
+            loop = asyncio.get_event_loop()
+            ...
 
     - Ensure existing event loop is closed before creating
     the new one if any.
@@ -35,7 +34,7 @@ def with_new_event_loop(_fun=None):
             asyncio.set_event_loop(_loop)
 
             try:
-                return fun(*args, loop=_loop, **kwargs)
+                return fun(*args, **kwargs)
             finally:
                 _loop.run_until_complete(_loop.shutdown_asyncgens())
                 _loop.close()
@@ -45,17 +44,23 @@ def with_new_event_loop(_fun=None):
     return decorator if _fun is None else decorator(_fun)
 
 
-def with_delay(timer):
-    """ Delay function execution by a timer:
+def with_delay(delay):
+    """Delay function execution.
 
-        await asyncio.sleep(timer)
-        await fun()
+    .. code-block:: python
+
+        @aiotesttoolkit.with_delay(1)
+        async def foo():
+            ...
+    
+    :param delay: value
     """
 
     def decorator(fun):
         @functools.wraps(fun)
         async def wrapper(*args, **kwargs):
-            await asyncio.sleep(timer or 0)
+            delay = delay if delay is not None else 0
+            await asyncio.sleep(delay)
             return await fun(*args, **kwargs)
 
         return wrapper
@@ -63,34 +68,23 @@ def with_delay(timer):
     return decorator
 
 
-def with_timeout(timer):
-    """ Stop execution of a coroutine after a delay:
+def with_timeout(timeout):
+    """Timeout execution of a function.
 
-        await asyncio.wait(..., timeout=timer)
+    .. code-block:: python
+
+        @aiotesttoolkit.with_timeout(1)
+        async def foo():
+            ...
+    
+    :param timeout: value
     """
 
     def decorator(fun):
         @functools.wraps(fun)
         async def wrapper(*args, **kwargs):
-            return await asyncio.wait([fun(*args, **kwargs)], timeout=timer)
-
-        return wrapper
-
-    return decorator
-
-
-def run_forever():
-    """ Run a function forever:
-
-        while True:
-            await fun()
-    """
-
-    def decorator(fun):
-        @functools.wraps(fun)
-        async def wrapper(*args, **kwargs):
-            while True:
-                await fun(*args, **kwargs)
+            timeout = timeout if timeout is not None else 0
+            return await asyncio.wait([fun(*args, **kwargs)], timeout=timeout)
 
         return wrapper
 

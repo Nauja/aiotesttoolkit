@@ -10,8 +10,22 @@
 						{"name": "test_create_factory"},
 						{"name": "test_create_main"},
 						{"name": "test_start"},
-						{"name": "test_start_decorator"},
+						{"name": "test_start_decorator1"},
+						{"name": "test_start_decorator2"},
 						{"name": "test_start_timeout"}
+					]
+				}
+			]
+		},
+		{
+			"name": "test.test_utils",
+			"test_cases": [
+				{
+					"name": "UtilsTestCase",
+					"tests": [
+						{"name": "test_new_event_loop"},
+						{"name": "test_delay"},
+						{"name": "test_timeout"}
 					]
 				}
 			]

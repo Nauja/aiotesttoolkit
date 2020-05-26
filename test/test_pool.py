@@ -1,10 +1,9 @@
-""" Tests for the pool module """
+""" Tests for the _pool module """
 import asyncio
 import aiotesttoolkit
-from aiotesttoolkit.loader import TestCase
 
 
-class PoolTestCase(TestCase):
+class PoolTestCase(aiotesttoolkit.TestCase):
     def test_create(self):
         async def worker():
             print("Hello World !")
@@ -40,8 +39,15 @@ class PoolTestCase(TestCase):
 
         aiotesttoolkit.start(worker, size=2)
 
-    def test_start_decorator(self):
+    def test_start_decorator1(self):
         @aiotesttoolkit.start(size=2)
+        async def worker():
+            print("worker with start decorator")
+
+        worker()
+
+    def test_start_decorator2(self):
+        @aiotesttoolkit.start()
         async def worker():
             print("worker with start decorator")
 

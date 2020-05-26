@@ -1,20 +1,9 @@
 """ Some functions to manage specific contexts """
-__all__ = ["AsyncContextDecorator", "CreateTask"]
+__all__ = ["CreateTask"]
 import asyncio
 
 
-class AsyncContextDecorator(object):
-    """ Context decorator for asyncio """
-
-    def __call__(self, fun):
-        async def wrapper(*args, **kwargs):
-            async with self:
-                await fun(*args, **kwargs)
-
-        return wrapper
-
-
-class CreateTask(AsyncContextDecorator):
+class CreateTask(object):
     """ Start a task on enter, cancel it on exit """
 
     def __init__(self, coro, *, loop=None):
