@@ -12,7 +12,8 @@
 						{"name": "test_start"},
 						{"name": "test_start_decorator1"},
 						{"name": "test_start_decorator2"},
-						{"name": "test_start_timeout"}
+						{"name": "test_start_timeout"},
+						{"name": "test_gather"}
 					]
 				}
 			]

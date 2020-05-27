@@ -1,5 +1,5 @@
 """ Module to setup and run a pool of tasks """
-__all__ = ["create", "start", "create_tasks", "run_tasks"]
+__all__ = ["create", "start", "create_tasks"]
 import asyncio
 import functools
 
@@ -45,7 +45,7 @@ def create(coro, *, main=None, factory=None, size=None, **kwargs):
         ...
         >>> async def main(*args, **kwargs):
         ...     print("before")
-        ...     await aiotesttoolkit.run_tasks(*args, **kwargs)
+        ...     await asyncio.wait(*args, **kwargs)
         ...     print("after")
         ...
         >>> loop.run_until_complete(aiotesttoolkit.create(worker, main=main, size=2))
@@ -55,15 +55,16 @@ def create(coro, *, main=None, factory=None, size=None, **kwargs):
         after
     
     :param coro: task to run
-    :param main: how to run the tasks
+    :param main: how to run the tasks (default `asyncio.wait`)
     :param factory: how to instantiate tasks
     :param size: size of the pool
     :param kwargs: additional arguments passed to `main`.
     :return: new pool
     """
-    main = main or run_tasks
+    main = main or asyncio.wait
     factory = factory or create_tasks
-    return main(factory(coro, size=size), **kwargs)
+    tasks = factory(coro, size=size)
+    return main([_ for _ in tasks], **kwargs)
 
 
 def start(coro=None, *, main=None, factory=None, size=None, loop=None, **kwargs):
@@ -134,16 +135,3 @@ def create_tasks(coro, *, size=None):
     :return: tasks
     """
     return (coro() for _ in range(0, size or 1))
-
-
-async def run_tasks(tasks, **kwargs):
-    """Run a pool of tasks.
-
-    This function returns when all tasks are completed.
-
-    :param tasks: tasks to run
-    :param kwargs: additional arguments passed to `asyncio.wait`.
-    :return: completed tasks
-    """
-    done, _ = await asyncio.wait([_ for _ in tasks], **kwargs)
-    return done

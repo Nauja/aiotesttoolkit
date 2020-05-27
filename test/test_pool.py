@@ -27,7 +27,7 @@ class PoolTestCase(aiotesttoolkit.TestCase):
 
         async def main(*args, **kwargs):
             print("before")
-            await aiotesttoolkit.run_tasks(*args, **kwargs)
+            await asyncio.wait(*args, **kwargs)
             print("after")
 
         loop = asyncio.get_event_loop()
@@ -62,3 +62,10 @@ class PoolTestCase(aiotesttoolkit.TestCase):
 
         worker()
         print("worker timed out")
+
+    def test_gather(self):
+        @aiotesttoolkit.start(main=asyncio.gather, size=2)
+        async def worker():
+            return 1
+
+        worker()

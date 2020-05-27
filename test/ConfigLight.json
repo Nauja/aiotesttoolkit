@@ -1,0 +1,15 @@
+{
+	"children": [
+		{
+			"name": "test.test_scenario",
+			"test_cases": [
+				{
+					"name": "ScenarioTestCase",
+					"tests": [
+						{"name": "test"}
+					]
+				}
+			]
+		}
+	]
+}

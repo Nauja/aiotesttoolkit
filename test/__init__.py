@@ -6,7 +6,7 @@ def main():
     aiotesttoolkit.setup_logging()
 
     aiotesttoolkit.run(
-        "test/Config.json", parent_module=None, cover_package="aiotesttoolkit",
+        "test/ConfigLight.json", parent_module=None, cover_package="aiotesttoolkit",
     )
 
 

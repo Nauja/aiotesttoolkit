@@ -15,7 +15,6 @@ __all__ = [
     "create",
     "start",
     "create_tasks",
-    "run_tasks",
     # _utils
     "with_new_event_loop",
     "with_delay",
