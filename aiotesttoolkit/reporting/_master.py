@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class MasterReporter(object):
-    def __init__(self, host, port=None, *, buffer_size=None, receive=None, decode=None):
+    def __init__(self, host, port=None, *, handle_stat, buffer_size=None, receive=None, decode=None):
         '''Master reporter.
 
         Received stats emitted by slave reporters.
@@ -24,6 +24,7 @@ class MasterReporter(object):
         self._port = port
         self._server = None
         self._slaves = []
+        self._handle_stat = handle_stat
         self._buffer_size = buffer_size if buffer_size is not None else 1024
         self._receive = receive if receive is not None else self.receive
         self._decode = decode if decode is not None else MasterReporter.decode
@@ -94,7 +95,7 @@ class MasterReporter(object):
 
                 stats, data = self._decode(data)
                 for _ in stats:
-                    await self.emit(_)
+                    await self._handle_stat(_)
         except Exception as e:
             raise e
 
